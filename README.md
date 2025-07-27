@@ -1,1 +1,1 @@
-# xxl-job-plus-starter
+# xxl-job-lite-starter

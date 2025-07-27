@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AIAssistantCustomInstructionsStorage">
+    <option name="instructions">
+      <map>
+        <entry key="AIAssistant.VCS.GenerateCommitMessage">
+          <value>
+            <AIAssistantStoredInstruction>
+              <option name="actionId" value="AIAssistant.VCS.GenerateCommitMessage" />
+              <option name="content" value="feat: 添加新功能描述&#10;- 功能点1&#10;- 功能点2&#10;&#10;fix: 修复问题描述&#10;- 修复点1&#10;- 修复点2&#10;&#10;docs: 文档更新描述&#10;- 更新点1&#10;- 更新点2&#10;&#10;style: 代码格式调整描述&#10;- 调整点1&#10;- 调整点2&#10;&#10;refactor: 代码重构描述&#10;- 重构点1&#10;- 重构点2&#10;&#10;test: 添加测试用例描述&#10;- 测试点1&#10;- 测试点2&#10;&#10;chore: 构建过程或工具变动描述&#10;- 变动点1&#10;- 变动点2&#10;&#10;perf: 性能优化描述&#10;- 优化点1&#10;- 优化点2&#10;&#10;ci: 持续集成相关更改描述&#10;- 更改点1&#10;- 更改点2&#10;&#10;revert: 回滚到之前的提交描述&#10;- 回滚点1&#10;- 回滚点2&#10;    &#10;按照这个模版生成&#10;使用英文回答&#10;消息尽可能简短" />
+            </AIAssistantStoredInstruction>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+  <component name="com.github.blarc.ai.commits.intellij.plugin.settings.ProjectSettings" isProjectSpecificLLMClient="true">
+    <option name="projectSpecificLLMClient" value="true" />
+  </component>
+</project>
