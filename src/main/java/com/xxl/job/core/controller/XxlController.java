@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * XXL控制器
  *
- * @author cn-dumaszhong
+ * @author Dumas
  */
 @RestController
 @RequestMapping("/xxl")
