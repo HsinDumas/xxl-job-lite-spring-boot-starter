@@ -47,8 +47,9 @@ public class XxlJobLiteAutoConfiguration {
             if (StringUtils.hasLength(xxlJobProperties.getAddress())) {
                 xxlJobSpringExecutor.setAddress(xxlJobProperties.getAddress());
             } else {
-                xxlJobSpringExecutor.setAddress("http://{ip_port}/"
-                        .replace("{ip_port}", IpUtil.getIpPort(IpUtil.getIp(), serverProperties.getPort())));
+                xxlJobSpringExecutor.setAddress("http://{ip_port}/{contextPath}/xxl"
+                        .replace("{ip_port}", IpUtil.getIpPort(IpUtil.getIp(), serverProperties.getPort()))
+                        .replace("{contextPath}", serverProperties.getServlet().getContextPath()));
             }
         }
         log.info(">>>>>>>>>>> [完成] xxl-job config init. Executor = {}", xxlJobSpringExecutor);
