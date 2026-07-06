@@ -21,8 +21,8 @@
 
 | 项 | latest | last verified |
 | --- | --- | --- |
-| starter | 见 Releases | 3.1.1 |
-| xxl-job | 跟随 starter 版本 | 3.1.1 |
+| starter | 见 Releases | 3.4.2 |
+| xxl-job | 跟随 starter 版本 | 3.4.2 |
 | Spring Boot | 3.x | 3.4.x |
 | JDK (runtime) | 17+ | 17 |
 

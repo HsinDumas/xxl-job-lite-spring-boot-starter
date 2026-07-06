@@ -21,8 +21,8 @@ The code is based on [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/mast
 
 | Item | latest | last verified |
 | --- | --- | --- |
-| starter | see Releases | 3.1.1 |
-| xxl-job | follows starter version | 3.1.1 |
+| starter | see Releases | 3.4.2 |
+| xxl-job | follows starter version | 3.4.2 |
 | Spring Boot | 3.x | 3.4.x |
 | JDK (runtime) | 17+ | 17 |
 
