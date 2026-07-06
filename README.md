@@ -19,9 +19,12 @@
 
 ## 兼容性
 
-| starter | xxl-job | Spring Boot | JDK |
-| --- | --- | --- | --- |
-| 3.1.1 | 3.1.1 | 3.x | 17+ |
+| 项 | latest | last verified |
+| --- | --- | --- |
+| starter | 见 Releases | 3.1.1 |
+| xxl-job | 跟随 starter 版本 | 3.1.1 |
+| Spring Boot | 3.x | 3.4.x |
+| JDK (runtime) | 17+ | 17 |
 
 最新版本请以 GitHub Releases 为准：<https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
 

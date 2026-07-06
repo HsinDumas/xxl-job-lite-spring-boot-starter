@@ -19,9 +19,12 @@ The code is based on [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/mast
 
 ## Compatibility
 
-| starter | xxl-job | Spring Boot | JDK |
-| --- | --- | --- | --- |
-| 3.1.1 | 3.1.1 | 3.x | 17+ |
+| Item | latest | last verified |
+| --- | --- | --- |
+| starter | see Releases | 3.1.1 |
+| xxl-job | follows starter version | 3.1.1 |
+| Spring Boot | 3.x | 3.4.x |
+| JDK (runtime) | 17+ | 17 |
 
 For the latest version, see GitHub Releases: <https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
 
