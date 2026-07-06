@@ -145,3 +145,7 @@ mavenPublishing {
         }
     }
 }
+
+tasks.matching { it.name == "generateMetadataFileForMavenPublication" }.configureEach {
+    dependsOn("plainJavadocJar")
+}
