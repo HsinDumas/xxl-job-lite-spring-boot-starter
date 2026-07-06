@@ -47,15 +47,17 @@ public class XxlJobLiteAutoConfiguration {
                 xxlJobSpringExecutor.setAddress(xxlJobProperties.getAddress());
             } else {
                 String address = "http://" + IPTool.toAddressString(IPTool.getIp(), serverProperties.getPort());
-                String contextPath = serverProperties.getServlet().getContextPath();
+                String contextPath = serverProperties.getServlet() == null
+                        ? null
+                        : serverProperties.getServlet().getContextPath();
                 if (StringUtils.hasLength(contextPath)) {
                     if (contextPath.startsWith("/")) {
                         address = address + contextPath;
                     } else {
                         address = address + "/" + contextPath;
                     }
-                    xxlJobSpringExecutor.setAddress(address + "/xxl");
                 }
+                xxlJobSpringExecutor.setAddress(address + "/xxl");
             }
         }
 
