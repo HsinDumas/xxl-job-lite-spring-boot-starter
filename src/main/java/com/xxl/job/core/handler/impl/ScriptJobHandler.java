@@ -14,10 +14,10 @@ import java.io.File;
  */
 public class ScriptJobHandler extends IJobHandler {
 
-    private int jobId;
-    private long glueUpdatetime;
-    private String gluesource;
-    private GlueTypeEnum glueType;
+    private final int jobId;
+    private final long glueUpdatetime;
+    private final String gluesource;
+    private final GlueTypeEnum glueType;
 
     public ScriptJobHandler(int jobId, long glueUpdatetime, String gluesource, GlueTypeEnum glueType){
         this.jobId = jobId;
@@ -29,9 +29,9 @@ public class ScriptJobHandler extends IJobHandler {
         File glueSrcPath = new File(XxlJobFileAppender.getGlueSrcPath());
         if (glueSrcPath.exists()) {
             File[] glueSrcFileList = glueSrcPath.listFiles();
-            if (glueSrcFileList!=null && glueSrcFileList.length>0) {
+            if (glueSrcFileList != null) {
                 for (File glueSrcFileItem : glueSrcFileList) {
-                    if (glueSrcFileItem.getName().startsWith(String.valueOf(jobId)+"_")) {
+                    if (glueSrcFileItem.getName().startsWith(jobId +"_")) {
                         glueSrcFileItem.delete();
                     }
                 }
@@ -47,6 +47,7 @@ public class ScriptJobHandler extends IJobHandler {
     @Override
     public void execute() throws Exception {
 
+        // valid
         if (!glueType.isScript()) {
             XxlJobHelper.handleFail("glueType["+ glueType +"] invalid.");
             return;
@@ -68,11 +69,12 @@ public class ScriptJobHandler extends IJobHandler {
         }
 
         // log file
-        String logFileName = XxlJobContext.getXxlJobContext().getJobLogFileName();
+        String logFileName = XxlJobContext.getXxlJobContext().getLogFileName();
 
         // script params：0=param、1=分片序号、2=分片总数
+        String jobParam = XxlJobHelper.getJobParam();
         String[] scriptParams = new String[3];
-        scriptParams[0] = XxlJobHelper.getJobParam();
+        scriptParams[0] = jobParam!=null?jobParam:"";
         scriptParams[1] = String.valueOf(XxlJobContext.getXxlJobContext().getShardIndex());
         scriptParams[2] = String.valueOf(XxlJobContext.getXxlJobContext().getShardTotal());
 

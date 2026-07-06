@@ -1,15 +1,18 @@
 package com.xxl.job.core.executor;
 
-import com.xxl.job.core.biz.AdminBiz;
-import com.xxl.job.core.biz.client.AdminBizClient;
+import com.xxl.job.core.constant.Const;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import com.xxl.job.core.handler.impl.MethodJobHandler;
 import com.xxl.job.core.log.XxlJobFileAppender;
-import com.xxl.job.core.thread.ExecutorRegistryThread;
-import com.xxl.job.core.thread.JobLogFileCleanThread;
+import com.xxl.job.core.openapi.AdminBiz;
+import com.xxl.job.core.thread.ExecutorRegistryThreadHelper;
+import com.xxl.job.core.thread.JobLogFileCleanThreadHelper;
 import com.xxl.job.core.thread.JobThread;
-import com.xxl.job.core.thread.TriggerCallbackThread;
+import com.xxl.job.core.thread.TriggerCallbackThreadHelper;
+import com.xxl.tool.core.MapTool;
+import com.xxl.tool.core.StringTool;
+import com.xxl.tool.http.HttpTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,172 +20,153 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by xuxueli on 2016/3/2 21:14.
  */
-public class XxlJobExecutor {
+public class XxlJobExecutor  {
     private static final Logger logger = LoggerFactory.getLogger(XxlJobExecutor.class);
-    // ---------------------- job handler repository ----------------------
-    private static final ConcurrentMap<String, IJobHandler> jobHandlerRepository =
-            new ConcurrentHashMap<String, IJobHandler>();
-    // ---------------------- job thread repository ----------------------
-    private static final ConcurrentMap<Integer, JobThread> jobThreadRepository =
-            new ConcurrentHashMap<Integer, JobThread>();
-    // ---------------------- admin-client (rpc invoker) ----------------------
-    private static List<AdminBiz> adminBizList;
-    // ---------------------- param ----------------------
+
+
+    // ---------------------- instance ----------------------
+
+    private static XxlJobExecutor xxlJobExecutor = null;
+    public static XxlJobExecutor getInstance() {
+        if (xxlJobExecutor == null) {
+            throw new RuntimeException(">>>>>>>>>>> xxl-job load executor instance fail, please initialize it.");
+        }
+        return xxlJobExecutor;
+    }
+
+
+    // ---------------------- field ----------------------
+
     private String adminAddresses;
     private String accessToken;
     private int timeout;
+    private Boolean enabled;
     private String appname;
     private String address;
+    private String ip;
+    private int port;
     private String logPath;
     private int logRetentionDays;
 
-    public static List<AdminBiz> getAdminBizList() {
-        return adminBizList;
-    }
-
-    public static void setAdminBizList(List<AdminBiz> adminBizList) {
-        XxlJobExecutor.adminBizList = adminBizList;
-    }
-
-    public static IJobHandler loadJobHandler(String name) {
-        return jobHandlerRepository.get(name);
-    }
-
-    public static IJobHandler registJobHandler(String name, IJobHandler jobHandler) {
-        logger.info(">>>>>>>>>>> xxl-job register jobhandler success, name:{}, jobHandler:{}", name, jobHandler);
-        return jobHandlerRepository.put(name, jobHandler);
-    }
-
-    public static JobThread registJobThread(int jobId, IJobHandler handler, String removeOldReason) {
-        JobThread newJobThread = new JobThread(jobId, handler);
-        newJobThread.start();
-        logger.info(">>>>>>>>>>> xxl-job regist JobThread success, jobId:{}, handler:{}", jobId, handler);
-
-        JobThread oldJobThread = jobThreadRepository.put(
-                jobId, newJobThread); // putIfAbsent | oh my god, map's put method return the old value!!!
-        if (oldJobThread != null) {
-            oldJobThread.toStop(removeOldReason);
-            oldJobThread.interrupt();
-        }
-
-        return newJobThread;
-    }
-
-    public static JobThread removeJobThread(int jobId, String removeOldReason) {
-        JobThread oldJobThread = jobThreadRepository.remove(jobId);
-        if (oldJobThread != null) {
-            oldJobThread.toStop(removeOldReason);
-            oldJobThread.interrupt();
-
-            return oldJobThread;
-        }
-        return null;
-    }
-
-    public static JobThread loadJobThread(int jobId) {
-        return jobThreadRepository.get(jobId);
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", XxlJobExecutor.class.getSimpleName() + "[", "]")
-                .add("adminAddresses='" + adminAddresses + "'")
-                .add("accessToken='" + accessToken + "'")
-                .add("timeout=" + timeout)
-                .add("appname='" + appname + "'")
-                .add("address='" + address + "'")
-                .add("logPath='" + logPath + "'")
-                .add("logRetentionDays=" + logRetentionDays)
-                .toString();
-    }
-
-    public String getAdminAddresses() {
-        return adminAddresses;
-    }
-
     public void setAdminAddresses(String adminAddresses) {
         this.adminAddresses = adminAddresses;
+    }
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+    public void setAppname(String appname) {
+        this.appname = appname;
+    }
+    public void setAddress(String address) {
+        this.address = address;
+    }
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+    public void setPort(int port) {
+        this.port = port;
+    }
+    public void setLogPath(String logPath) {
+        this.logPath = logPath;
+    }
+    public void setLogRetentionDays(int logRetentionDays) {
+        this.logRetentionDays = logRetentionDays;
     }
 
     public String getAccessToken() {
         return accessToken;
     }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
-    }
-
     public String getAppname() {
         return appname;
     }
-
-    public void setAppname(String appname) {
-        this.appname = appname;
-    }
-
     public String getAddress() {
         return address;
     }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public int getPort() {
+        return port;
     }
 
-    public String getLogPath() {
-        return logPath;
-    }
-
-    public void setLogPath(String logPath) {
-        this.logPath = logPath;
-    }
-
-    public int getLogRetentionDays() {
-        return logRetentionDays;
-    }
-
-    public void setLogRetentionDays(int logRetentionDays) {
-        this.logRetentionDays = logRetentionDays;
-    }
 
     // ---------------------- start + stop ----------------------
+
+    private ExecutorRegistryThreadHelper executorRegistryThreadHelper;
+    private JobLogFileCleanThreadHelper jobLogFileCleanThreadHelper;
+    private TriggerCallbackThreadHelper triggerCallbackThreadHelper;
+
+    public ExecutorRegistryThreadHelper getExecutorRegistryThreadHelper() {
+        return executorRegistryThreadHelper;
+    }
+    public TriggerCallbackThreadHelper getTriggerCallbackThreadHelper() {
+        return triggerCallbackThreadHelper;
+    }
+
+    /**
+     * start
+     */
     public void start() throws Exception {
+
+        // bind instance
+        xxlJobExecutor = this;
+
+        // valid enabled
+        if (enabled!=null && !enabled) {
+            logger.info(">>>>>>>>>>> xxl-job executor start fail, enabled:{}", enabled);
+            return;
+        }
 
         // init logpath
         XxlJobFileAppender.initLogPath(logPath);
 
         // init invoker, admin-client
-        initAdminBizList(adminAddresses, accessToken, timeout);
+        initAdminBizList();
 
-        // init JobLogFileCleanThread
-        JobLogFileCleanThread.getInstance().start(logRetentionDays);
+        // 1、init JobLogFileCleanThread
+        jobLogFileCleanThreadHelper = new JobLogFileCleanThreadHelper();
+        jobLogFileCleanThreadHelper.start(logRetentionDays);
 
-        // init TriggerCallbackThread
-        TriggerCallbackThread.getInstance().start();
+        // 2、init TriggerCallbackThread
+        triggerCallbackThreadHelper = new TriggerCallbackThreadHelper();
+        triggerCallbackThreadHelper.start(this);
 
-        ExecutorRegistryThread.getInstance().start(appname, address);
+        // 3、lite mode: no embedded netty server, only executor registry heartbeat
+        executorRegistryThreadHelper = new ExecutorRegistryThreadHelper();
+        executorRegistryThreadHelper.start(this);
     }
 
-    public void destroy() {
-        ExecutorRegistryThread.getInstance().toStop();
+    /**
+     * destroy
+     */
+    public void destroy(){
+        // 1、stop executor registry
+        if (executorRegistryThreadHelper != null) {
+            executorRegistryThreadHelper.stop(this);
+        }
 
         // destroy jobThreadRepository
-        if (jobThreadRepository.size() > 0) {
-            for (Map.Entry<Integer, JobThread> item : jobThreadRepository.entrySet()) {
+        if (MapTool.isNotEmpty(jobThreadRepository)) {
+
+            // 1.1、elegant shutdown wait job finish
+            try {
+                TimeUnit.SECONDS.sleep(Const.ELEGANT_SHUTDOWN_WAITING_SECONDS);
+            } catch (Throwable e) {
+                logger.error(e.getMessage(), e);
+            }
+
+            // 1.2、interupt all job-thread
+            for (Map.Entry<Integer, JobThread> item: jobThreadRepository.entrySet()) {
                 JobThread oldJobThread = removeJobThread(item.getKey(), "web container destroy and kill the job.");
                 // wait for job thread push result to callback queue
                 if (oldJobThread != null) {
@@ -197,43 +181,99 @@ public class XxlJobExecutor {
         }
         jobHandlerRepository.clear();
 
-        // destroy JobLogFileCleanThread
-        JobLogFileCleanThread.getInstance().toStop();
+        // 2、destroy TriggerCallbackThread
+        triggerCallbackThreadHelper.stop();
 
-        // destroy TriggerCallbackThread
-        TriggerCallbackThread.getInstance().toStop();
+        // 3、destroy JobLogFileCleanThread
+        jobLogFileCleanThreadHelper.stop();
     }
 
-    private void initAdminBizList(String adminAddresses, String accessToken, int timeout) throws Exception {
-        if (adminAddresses != null && adminAddresses.trim().length() > 0) {
-            for (String address : adminAddresses.trim().split(",")) {
-                if (address != null && address.trim().length() > 0) {
 
-                    AdminBiz adminBiz = new AdminBizClient(address.trim(), accessToken, timeout);
+    // ---------------------- admin-client (rpc invoker) ----------------------
 
-                    if (adminBizList == null) {
-                        adminBizList = new ArrayList<AdminBiz>();
-                    }
-                    adminBizList.add(adminBiz);
-                }
+    /**
+     * admin-client list
+     */
+    private final List<AdminBiz> adminBizList = new ArrayList<>();
+
+    /**
+     * init adminBizList
+     */
+    private void initAdminBizList() throws Exception {
+
+        // valid
+        if (StringTool.isBlank(adminAddresses)) {
+            return;
+        }
+
+        // build adminBizList
+        for (String address: adminAddresses.trim().split(",")) {
+            if (StringTool.isBlank(address)) {
+                continue;
             }
+
+            // parse param
+            String finalAddress = address.trim();
+            finalAddress = finalAddress.endsWith("/") ? (finalAddress + "api") : (finalAddress + "/api");
+            int finalTimeout = (timeout >=1 && timeout <= 10)
+                    ?timeout
+                    :3;
+
+            // build
+            AdminBiz adminBiz = HttpTool.createClient()
+                    .url(finalAddress)
+                    .timeout(finalTimeout * 1000)
+                    .header(Const.XXL_JOB_ACCESS_TOKEN, accessToken)
+                    .proxy(AdminBiz.class);
+
+            // registry
+            adminBizList.add(adminBiz);
         }
     }
 
+    /**
+     * get adminBizList
+     */
+    public List<AdminBiz> getAdminBizList(){
+        return adminBizList;
+    }
 
+    // ---------------------- job handler repository ----------------------
 
-    protected void registJobHandler(XxlJob xxlJob, Object bean, Method executeMethod) {
+    /**
+     * job handler repository
+     */
+    private final ConcurrentMap<String, IJobHandler> jobHandlerRepository = new ConcurrentHashMap<>();
+
+    /**
+     * load JobHandler instance by name
+     */
+    public IJobHandler loadJobHandler(String name){
+        return jobHandlerRepository.get(name);
+    }
+
+    /**
+     * registry JobHandler
+     */
+    public IJobHandler registryJobHandler(String name, IJobHandler jobHandler){
+        logger.info(">>>>>>>>>>> xxl-job register jobhandler success, name:{}, jobHandler:{}", name, jobHandler);
+        return jobHandlerRepository.put(name, jobHandler);
+    }
+
+    /**
+     * registry JobHandler for method
+     */
+    protected void registryJobHandler(XxlJob xxlJob, Object bean, Method executeMethod){
         if (xxlJob == null) {
             return;
         }
 
         String name = xxlJob.value();
-        // make and simplify the variables since they'll be called several times later
+        //make and simplify the variables since they'll be called several times later
         Class<?> clazz = bean.getClass();
         String methodName = executeMethod.getName();
-        if (name.trim().length() == 0) {
-            throw new RuntimeException(
-                    "xxl-job method-jobhandler name invalid, for[" + clazz + "#" + methodName + "] .");
+        if (name.trim().isEmpty()) {
+            throw new RuntimeException("xxl-job method-jobhandler name invalid, for[" + clazz + "#" + methodName + "] .");
         }
         if (loadJobHandler(name) != null) {
             throw new RuntimeException("xxl-job jobhandler[" + name + "] naming conflicts.");
@@ -255,26 +295,59 @@ public class XxlJobExecutor {
         Method initMethod = null;
         Method destroyMethod = null;
 
-        if (xxlJob.init().trim().length() > 0) {
+        if (StringTool.isNotBlank(xxlJob.init())) {
             try {
                 initMethod = clazz.getDeclaredMethod(xxlJob.init());
                 initMethod.setAccessible(true);
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException(
-                        "xxl-job method-jobhandler initMethod invalid, for[" + clazz + "#" + methodName + "] .");
+                throw new RuntimeException("xxl-job method-jobhandler initMethod invalid, for[" + clazz + "#" + methodName + "] .");
             }
         }
-        if (xxlJob.destroy().trim().length() > 0) {
+        if (StringTool.isNotBlank(xxlJob.destroy())) {
             try {
                 destroyMethod = clazz.getDeclaredMethod(xxlJob.destroy());
                 destroyMethod.setAccessible(true);
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException(
-                        "xxl-job method-jobhandler destroyMethod invalid, for[" + clazz + "#" + methodName + "] .");
+                throw new RuntimeException("xxl-job method-jobhandler destroyMethod invalid, for[" + clazz + "#" + methodName + "] .");
             }
         }
 
         // registry jobhandler
-        registJobHandler(name, new MethodJobHandler(bean, executeMethod, initMethod, destroyMethod));
+        registryJobHandler(name, new MethodJobHandler(bean, executeMethod, initMethod, destroyMethod));
+
     }
+
+
+    // ---------------------- job thread repository ----------------------
+
+    private final ConcurrentMap<Integer, JobThread> jobThreadRepository = new ConcurrentHashMap<>();
+    public JobThread registJobThread(int jobId, IJobHandler handler, String removeOldReason){
+        JobThread newJobThread = new JobThread(jobId, handler);
+        newJobThread.start();
+        logger.info(">>>>>>>>>>> xxl-job register JobThread success, jobId:{}, handler:{}", new Object[]{jobId, handler});
+
+        JobThread oldJobThread = jobThreadRepository.put(jobId, newJobThread);	// putIfAbsent | oh my god, map's put method return the old value!!!
+        if (oldJobThread != null) {
+            oldJobThread.toStop(removeOldReason);
+            oldJobThread.interrupt();
+        }
+
+        return newJobThread;
+    }
+
+    public JobThread removeJobThread(int jobId, String removeOldReason){
+        JobThread oldJobThread = jobThreadRepository.remove(jobId);
+        if (oldJobThread != null) {
+            oldJobThread.toStop(removeOldReason);
+            oldJobThread.interrupt();
+
+            return oldJobThread;
+        }
+        return null;
+    }
+
+    public JobThread loadJobThread(int jobId){
+        return jobThreadRepository.get(jobId);
+    }
+
 }

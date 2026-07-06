@@ -4,38 +4,22 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-/**
- * @author Dumas
- */
 @Validated
 @ConfigurationProperties(prefix = XxlJobProperties.PREFIX)
 public class XxlJobProperties {
     public static final String PREFIX = "xxljob";
-    /**
-     * logRetentionDays
-     */
+
     private final Integer logRetentionDays = 3;
-    /**
-     * adminAddresses
-     */
+
     @NotBlank
     private String adminAddresses;
-    /**
-     * accessToken
-     */
+
     private String accessToken;
-    /**
-     * If it is empty, turn off auto-register
-     */
+
     private String appname;
-    /**
-     * If the appname is not empty, it is automatically assembled with the IP and port of the current container,
-     * it can be overwritten if necessary
-     */
+
     private String address;
-    /**
-     * default is /data/applogs/xxl-job/jobhandler
-     */
+
     private String logPath;
 
     public Integer getLogRetentionDays() {

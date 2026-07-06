@@ -7,16 +7,17 @@ group = "com.github.hsindumas"
 
 val resolvedVersion = providers.gradleProperty("releaseVersion")
     .orElse(providers.environmentVariable("RELEASE_VERSION"))
-    .orElse("3.1.1-SNAPSHOT")
+    .orElse("3.4.2-SNAPSHOT")
 version = resolvedVersion.get()
 
-val nettyVersion = "4.2.2.Final"
-val gsonVersion = "2.13.1"
-val groovyVersion = "4.0.27"
+val nettyVersion = "4.2.15.Final"
+val gsonVersion = "2.14.0"
+val groovyVersion = "5.0.6"
 val springVersion = "6.2.8"
 val springBootVersion = "3.4.8"
-val slf4jApiVersion = "2.0.17"
+val slf4jApiVersion = "2.0.18"
 val jakartaAnnotationApiVersion = "3.0.0"
+val xxlToolVersion = "2.5.0"
 
 repositories {
     mavenLocal()
@@ -76,6 +77,7 @@ gradle.taskGraph.whenReady {
 dependencies {
     implementation("io.netty:netty-codec-http:$nettyVersion")
     implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation("com.xuxueli:xxl-tool:$xxlToolVersion")
     implementation("org.apache.groovy:groovy:$groovyVersion")
 
     compileOnly("org.springframework:spring-context:$springVersion")
