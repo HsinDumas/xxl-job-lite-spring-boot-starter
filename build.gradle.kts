@@ -30,7 +30,6 @@ java {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
     withSourcesJar()
-    withJavadocJar()
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -146,6 +145,3 @@ mavenPublishing {
     }
 }
 
-tasks.matching { it.name == "generateMetadataFileForMavenPublication" }.configureEach {
-    dependsOn("plainJavadocJar")
-}
