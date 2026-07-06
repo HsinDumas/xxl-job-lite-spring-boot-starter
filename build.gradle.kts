@@ -7,7 +7,7 @@ group = "com.github.hsindumas"
 
 val resolvedVersion = providers.gradleProperty("releaseVersion")
     .orElse(providers.environmentVariable("RELEASE_VERSION"))
-    .orElse("3.4.2-SNAPSHOT")
+    .orElse("3.4.3-SNAPSHOT")
 version = resolvedVersion.get()
 
 val nettyVersion = "4.2.15.Final"
