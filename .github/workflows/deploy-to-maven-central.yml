@@ -1,0 +1,230 @@
+name: Release Publish (Central Tag)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: ${{ github.repository == 'HsinDumas/xxl-job-lite-spring-boot-starter' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Resolve release version
+        id: release_version
+        shell: bash
+        env:
+          RAW_VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION="${RAW_VERSION#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid release version: $VERSION"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Fail if version already exists on Maven Central
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.release_version.outputs.version }}
+        run: |
+          set -euo pipefail
+          QUERY_URL="https://search.maven.org/solrsearch/select?q=g:%22com.github.hsindumas%22+AND+a:%22xxl-job-lite-spring-boot-starter%22+AND+v:%22${RELEASE_VERSION}%22&rows=20&wt=json"
+          RESPONSE="$(curl -fsSL "$QUERY_URL")"
+          if echo "$RESPONSE" | grep -q '"numFound"[[:space:]]*:[[:space:]]*0'; then
+            echo "Version ${RELEASE_VERSION} not found on Maven Central, continue publishing."
+          else
+            echo "Version ${RELEASE_VERSION} already exists on Maven Central, aborting release."
+            exit 1
+          fi
+
+      - name: Build conventional release notes
+        id: release_notes
+        shell: bash
+        env:
+          CURRENT_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          git fetch --tags --force
+          PREV_TAG="$(git tag --sort=-v:refname | grep -v "^${CURRENT_TAG}$" | head -n 1 || true)"
+          if [[ -n "$PREV_TAG" ]]; then
+            RANGE="${PREV_TAG}..${CURRENT_TAG}"
+          else
+            RANGE="$CURRENT_TAG"
+          fi
+
+          SUBJECTS_FILE="$(mktemp)"
+          COMMITS_FILE="$(mktemp)"
+          FEATURES_FILE="$(mktemp)"
+          FIXES_FILE="$(mktemp)"
+          BREAKING_FILE="$(mktemp)"
+          OTHERS_FILE="$(mktemp)"
+          NOTES_FILE="$(mktemp)"
+
+          git log "$RANGE" --pretty=format:'%s' > "$SUBJECTS_FILE"
+          git log "$RANGE" --pretty=format:'- %h %s' > "$COMMITS_FILE"
+
+          while IFS= read -r subject || [[ -n "$subject" ]]; do
+            [[ -z "$subject" ]] && continue
+
+            if printf '%s' "$subject" | grep -Eq '^[A-Za-z]+(\([^)]+\))?!:'; then
+              printf -- '- %s\n' "$subject" >> "$BREAKING_FILE"
+            fi
+
+            if printf '%s' "$subject" | grep -Eq '^feat(\([^)]+\))?!?:'; then
+              printf -- '- %s\n' "$subject" >> "$FEATURES_FILE"
+            elif printf '%s' "$subject" | grep -Eq '^fix(\([^)]+\))?!?:'; then
+              printf -- '- %s\n' "$subject" >> "$FIXES_FILE"
+            else
+              printf -- '- %s\n' "$subject" >> "$OTHERS_FILE"
+            fi
+          done < "$SUBJECTS_FILE"
+
+          {
+            echo "## Changes"
+            echo ""
+            if [[ -n "$PREV_TAG" ]]; then
+              echo "- Compared Range: ${PREV_TAG}..${CURRENT_TAG}"
+            else
+              echo "- Compared Range: ${CURRENT_TAG}"
+            fi
+            echo ""
+
+            if [[ -s "$BREAKING_FILE" ]]; then
+              echo "### Breaking Changes"
+              cat "$BREAKING_FILE"
+              echo ""
+            fi
+
+            if [[ -s "$FEATURES_FILE" ]]; then
+              echo "### Features"
+              cat "$FEATURES_FILE"
+              echo ""
+            fi
+
+            if [[ -s "$FIXES_FILE" ]]; then
+              echo "### Bug Fixes"
+              cat "$FIXES_FILE"
+              echo ""
+            fi
+
+            if [[ -s "$OTHERS_FILE" ]]; then
+              echo "### Other Changes"
+              cat "$OTHERS_FILE"
+              echo ""
+            fi
+
+            if [[ ! -s "$BREAKING_FILE" && ! -s "$FEATURES_FILE" && ! -s "$FIXES_FILE" && ! -s "$OTHERS_FILE" && -s "$COMMITS_FILE" ]]; then
+              echo "### Commits"
+              cat "$COMMITS_FILE"
+            fi
+          } > "$NOTES_FILE"
+
+          {
+            echo "content<<EOF"
+            cat "$NOTES_FILE"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish and release artifacts to Maven Central
+        id: publish_central
+        shell: bash
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          SIGNING_IN_MEMORY_KEY: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_IN_MEMORY_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          SANITIZED_KEY="${SIGNING_IN_MEMORY_KEY//$'\\r'/}"
+          SANITIZED_KEY="${SANITIZED_KEY//\\n/$'\n'}"
+
+          if [[ "$SANITIZED_KEY" != *"BEGIN PGP PRIVATE KEY BLOCK"* ]]; then
+            DECODED_KEY="$(printf '%s' "$SANITIZED_KEY" | base64 -d 2>/dev/null || true)"
+            if [[ "$DECODED_KEY" == *"BEGIN PGP PRIVATE KEY BLOCK"* ]]; then
+              SANITIZED_KEY="$DECODED_KEY"
+            fi
+          fi
+
+          SANITIZED_KEY="$(printf '%s\n' "$SANITIZED_KEY" | sed '/^=/d')"
+          export ORG_GRADLE_PROJECT_signingInMemoryKey="$SANITIZED_KEY"
+
+          LOG_FILE="$(mktemp)"
+          ./gradlew --no-daemon -PreleaseVersion=${{ steps.release_version.outputs.version }} publishReleaseToMavenCentral | tee "$LOG_FILE"
+
+          DEPLOYMENT_ID="$(grep -Eo 'deployment id: [0-9a-fA-F-]+' "$LOG_FILE" | tail -n 1 | awk '{print $3}' || true)"
+          echo "deployment_id=$DEPLOYMENT_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Write release summary
+        shell: bash
+        run: |
+          {
+            echo "## Release Summary"
+            echo ""
+            echo "- Tag: ${{ github.ref_name }}"
+            echo "- Version: ${{ steps.release_version.outputs.version }}"
+            if [[ -n "${{ steps.publish_central.outputs.deployment_id }}" ]]; then
+              echo "- Maven Central Deployment ID: ${{ steps.publish_central.outputs.deployment_id }}"
+            else
+              echo "- Maven Central Deployment ID: not detected from Gradle output"
+            fi
+            echo "- Workflow Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create or update GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ steps.release_version.outputs.version }}
+          generate_release_notes: true
+          append_body: true
+          body: |
+            ${{ steps.release_notes.outputs.content }}
+
+            ## Publish metadata
+            - Maven Central Deployment ID: ${{ steps.publish_central.outputs.deployment_id || 'N/A' }}
+            - Workflow Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Bump fallback version to next snapshot on main
+        if: ${{ github.ref_name != '' }}
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.release_version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          IFS='.' read -r major minor patch <<< "$RELEASE_VERSION"
+          next_patch=$((patch + 1))
+          next_snapshot="${major}.${minor}.${next_patch}-SNAPSHOT"
+
+          sed -i "s/orElse(\"${RELEASE_VERSION}-SNAPSHOT\")/orElse(\"${next_snapshot}\")/" build.gradle.kts || true
+          sed -i "s/orElse(\"${RELEASE_VERSION}\")/orElse(\"${next_snapshot}\")/" build.gradle.kts || true
+
+          if git diff --quiet -- build.gradle.kts; then
+            echo "No fallback version change detected; skipping commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build.gradle.kts
+          git commit -m "chore: bump fallback version to ${next_snapshot} [skip ci]"
+          git push origin HEAD:main
