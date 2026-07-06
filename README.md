@@ -23,6 +23,8 @@
 | --- | --- | --- | --- |
 | 3.1.1 | 3.1.1 | 3.x | 17+ |
 
+最新版本请以 GitHub Releases 为准：<https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
+
 ## 快速开始
 
 ### 1) 引入依赖
@@ -31,9 +33,11 @@
 <dependency>
     <groupId>com.github.hsindumas</groupId>
     <artifactId>xxl-job-lite-spring-boot-starter</artifactId>
-    <version>3.1.1</version>
+      <version>${latest.version}</version>
 </dependency>
 ```
+
+请将 `${latest.version}` 替换为最新发布版本。
 
 ### 2) 配置
 
@@ -93,8 +97,8 @@ public class DemoJob {
 项目使用 tag 驱动发布到 Maven Central：
 
 ```bash
-git tag v3.1.1
-git push origin v3.1.1
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
 CI 会执行：版本校验、Central 发布、GitHub Release 生成。

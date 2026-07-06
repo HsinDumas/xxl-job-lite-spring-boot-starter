@@ -23,6 +23,8 @@ The code is based on [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/mast
 | --- | --- | --- | --- |
 | 3.1.1 | 3.1.1 | 3.x | 17+ |
 
+For the latest version, see GitHub Releases: <https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
+
 ## Quick Start
 
 ### 1) Add dependency
@@ -31,9 +33,11 @@ The code is based on [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/mast
 <dependency>
     <groupId>com.github.hsindumas</groupId>
     <artifactId>xxl-job-lite-spring-boot-starter</artifactId>
-    <version>3.1.1</version>
+    <version>${latest.version}</version>
 </dependency>
 ```
+
+Replace `${latest.version}` with the latest published version.
 
 ### 2) Configure
 
@@ -93,8 +97,8 @@ public class DemoJob {
 Tag-driven Maven Central release:
 
 ```bash
-git tag v3.1.1
-git push origin v3.1.1
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
 CI will run version checks, publish to Central, and create GitHub Release notes.
