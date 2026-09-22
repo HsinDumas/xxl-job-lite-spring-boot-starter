@@ -2,6 +2,7 @@
 
 [English](README_EN.md)
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.hsindumas/xxl-job-lite-spring-boot-starter.svg)](https://central.sonatype.com/artifact/com.github.hsindumas/xxl-job-lite-spring-boot-starter)
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
 [![JDK](https://img.shields.io/badge/JDK-21+-4EB1BA.svg)](https://docs.oracle.com/en/java/javase/21/)
 [![Spring Boot](https://img.shields.io/badge/SpringBoot-4.x-green.svg)](https://docs.spring.io/spring-boot/docs/current/reference/html/)
@@ -21,12 +22,12 @@
 
 | 项 | latest | last verified |
 | --- | --- | --- |
-| starter | 见 Releases | 4.0.0 |
+| starter | 见顶部徽章 | 4.0.0 |
 | xxl-job | 见下 | 3.4.2 |
 | Spring Boot | 4.x | 4.1.1 |
 | JDK (runtime) | 21+ | 21 |
 
-最新版本请以 GitHub Releases 为准：<https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
+各版本变更说明与升级指引见 GitHub Releases：<https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
 
 ## 快速开始
 
@@ -36,26 +37,26 @@
 <dependency>
     <groupId>com.github.hsindumas</groupId>
     <artifactId>xxl-job-lite-spring-boot-starter</artifactId>
-      <version>${latest.version}</version>
+    <version>4.0.0</version>
 </dependency>
 ```
 
-请将 `${latest.version}` 替换为最新发布版本。
+最新版本以顶部 Maven Central 徽章为准。
 
 ### 2) 配置
 
 ```yaml
 xxljob:
-      admin-addresses: http://127.0.0.1:8080/xxl-job-admin
-      appname: demo-executor
-      # 可选，不配则按当前应用地址自动推导（见下方说明）
-      # address: http://127.0.0.1:8081/xxl
-      # 可选
-      # access-token: your-token
-      # 可选，默认 3
-      # log-retention-days: 3
-      # 可选
-      # log-path: /data/applogs/xxl-job/jobhandler
+  admin-addresses: http://127.0.0.1:8080/xxl-job-admin
+  appname: demo-executor
+  # 可选，不配则按当前应用地址自动推导（见下方说明）
+  # address: http://127.0.0.1:8081/xxl
+  # 可选
+  # access-token: your-token
+  # 可选，默认 3
+  # log-retention-days: 3
+  # 可选
+  # log-path: /data/applogs/xxl-job/jobhandler
 ```
 
 ### 3) 在业务代码声明 Job
@@ -64,10 +65,10 @@ xxljob:
 @Component
 public class DemoJob {
 
-      @XxlJob("demoJobHandler")
-      public void execute() {
-            // your logic
-      }
+    @XxlJob("demoJobHandler")
+    public void execute() {
+        // your logic
+    }
 }
 ```
 

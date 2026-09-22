@@ -2,6 +2,7 @@
 
 [中文](README.md)
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.hsindumas/xxl-job-lite-spring-boot-starter.svg)](https://central.sonatype.com/artifact/com.github.hsindumas/xxl-job-lite-spring-boot-starter)
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
 [![JDK](https://img.shields.io/badge/JDK-21+-4EB1BA.svg)](https://docs.oracle.com/en/java/javase/21/)
 [![Spring Boot](https://img.shields.io/badge/SpringBoot-4.x-green.svg)](https://docs.spring.io/spring-boot/docs/current/reference/html/)
@@ -21,12 +22,12 @@ The code is based on [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/mast
 
 | Item | latest | last verified |
 | --- | --- | --- |
-| starter | see Releases | 4.0.0 |
+| starter | see badge above | 4.0.0 |
 | xxl-job | see below | 3.4.2 |
 | Spring Boot | 4.x | 4.1.1 |
 | JDK (runtime) | 21+ | 21 |
 
-For the latest version, see GitHub Releases: <https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
+Per-version change notes and upgrade guides are in GitHub Releases: <https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
 
 ## Quick Start
 
@@ -36,11 +37,11 @@ For the latest version, see GitHub Releases: <https://github.com/HsinDumas/xxl-j
 <dependency>
     <groupId>com.github.hsindumas</groupId>
     <artifactId>xxl-job-lite-spring-boot-starter</artifactId>
-    <version>${latest.version}</version>
+    <version>4.0.0</version>
 </dependency>
 ```
 
-Replace `${latest.version}` with the latest published version.
+The Maven Central badge at the top always shows the latest published version.
 
 ### 2) Configure
 
