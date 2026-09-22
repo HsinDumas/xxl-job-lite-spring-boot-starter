@@ -7,16 +7,16 @@ group = "com.github.hsindumas"
 
 val resolvedVersion = providers.gradleProperty("releaseVersion")
     .orElse(providers.environmentVariable("RELEASE_VERSION"))
-    .orElse("3.4.3-SNAPSHOT")
+    .orElse("4.0.0-SNAPSHOT")
 version = resolvedVersion.get()
 
-val nettyVersion = "4.2.15.Final"
 val gsonVersion = "2.14.0"
-val groovyVersion = "5.0.6"
-val springVersion = "6.2.8"
-val springBootVersion = "3.4.8"
+val groovyVersion = "5.0.8"
+val springVersion = "7.0.9"
+val springBootVersion = "4.1.1"
 val slf4jApiVersion = "2.0.18"
 val jakartaAnnotationApiVersion = "3.0.0"
+val junitVersion = "6.0.3"
 val xxlToolVersion = "2.5.0"
 
 repositories {
@@ -27,13 +27,13 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
     withSourcesJar()
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(17)
+    options.release.set(21)
 }
 
 fun Project.enforceTagDrivenRelease() {
@@ -74,7 +74,7 @@ gradle.taskGraph.whenReady {
 }
 
 dependencies {
-    implementation("io.netty:netty-codec-http:$nettyVersion")
+    // gson: xxl-tool declares it as provided, but TriggerCallbackThreadHelper needs it at runtime
     implementation("com.google.code.gson:gson:$gsonVersion")
     implementation("com.xuxueli:xxl-tool:$xxlToolVersion")
     implementation("org.apache.groovy:groovy:$groovyVersion")
@@ -83,6 +83,7 @@ dependencies {
     compileOnly("org.springframework:spring-web:$springVersion")
 
     compileOnly("org.springframework.boot:spring-boot-starter:$springBootVersion")
+    compileOnly("org.springframework.boot:spring-boot-web-server:$springBootVersion")
     compileOnly("org.springframework.boot:spring-boot-starter-validation:$springBootVersion")
     compileOnly("org.springframework.boot:spring-boot-configuration-processor:$springBootVersion")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor:$springBootVersion")
@@ -90,6 +91,14 @@ dependencies {
     implementation("org.slf4j:slf4j-api:$slf4jApiVersion")
 
     compileOnly("jakarta.annotation:jakarta.annotation-api:$jakartaAnnotationApiVersion")
+
+    // compileOnly deps are not inherited by the test source set, so restate what the smoke test needs
+    testImplementation(platform("org.junit:junit-bom:$junitVersion"))
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-validation:$springBootVersion")
+    testImplementation("org.springframework.boot:spring-boot-web-server:$springBootVersion")
+    testImplementation("org.springframework:spring-web:$springVersion")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test>().configureEach {

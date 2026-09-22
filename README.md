@@ -3,8 +3,8 @@
 [English](README_EN.md)
 
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
-[![JDK](https://img.shields.io/badge/JDK-17+-4EB1BA.svg)](https://docs.oracle.com/en/java/javase/17/)
-[![Spring Boot](https://img.shields.io/badge/SpringBoot-3.x-green.svg)](https://docs.spring.io/spring-boot/docs/current/reference/html/)
+[![JDK](https://img.shields.io/badge/JDK-21+-4EB1BA.svg)](https://docs.oracle.com/en/java/javase/21/)
+[![Spring Boot](https://img.shields.io/badge/SpringBoot-4.x-green.svg)](https://docs.spring.io/spring-boot/docs/current/reference/html/)
 [![Author](https://img.shields.io/badge/Author-HsinDumas-orange.svg?style=flat-square)](https://github.com/HsinDumas)
 
 适用于 xxl-job 的 Spring Boot Starter（Lite 版本，移除 EmbedServer）。
@@ -15,16 +15,16 @@
 2. 不再额外启动 EmbedServer。
 3. 直接复用你当前 Spring Boot 容器暴露 `/xxl/*` 接口。
 
-代码基于 [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/master/xxl-job-core) 二次开发，starter 版本与上游 xxl-job 版本保持一致。
+代码基于 [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/master/xxl-job-core) 二次开发。starter 从 `4.0.0` 起独立编号（基线提到 JDK 21，上游仍为 17），不再与上游 xxl-job 版本对齐；对应的上游版本见下表。
 
 ## 兼容性
 
 | 项 | latest | last verified |
 | --- | --- | --- |
-| starter | 见 Releases | 3.4.2 |
-| xxl-job | 跟随 starter 版本 | 3.4.2 |
-| Spring Boot | 3.x | 3.4.x |
-| JDK (runtime) | 17+ | 17 |
+| starter | 见 Releases | 4.0.0 |
+| xxl-job | 见下 | 3.4.2 |
+| Spring Boot | 4.x | 4.1.1 |
+| JDK (runtime) | 21+ | 21 |
 
 最新版本请以 GitHub Releases 为准：<https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
 
