@@ -7,7 +7,7 @@ group = "com.github.hsindumas"
 
 val resolvedVersion = providers.gradleProperty("releaseVersion")
     .orElse(providers.environmentVariable("RELEASE_VERSION"))
-    .orElse("4.0.0-SNAPSHOT")
+    .orElse("4.0.1-SNAPSHOT")
 version = resolvedVersion.get()
 
 val gsonVersion = "2.14.0"
