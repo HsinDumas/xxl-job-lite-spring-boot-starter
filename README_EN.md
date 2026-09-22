@@ -3,8 +3,8 @@
 [中文](README.md)
 
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
-[![JDK](https://img.shields.io/badge/JDK-17+-4EB1BA.svg)](https://docs.oracle.com/en/java/javase/17/)
-[![Spring Boot](https://img.shields.io/badge/SpringBoot-3.x-green.svg)](https://docs.spring.io/spring-boot/docs/current/reference/html/)
+[![JDK](https://img.shields.io/badge/JDK-21+-4EB1BA.svg)](https://docs.oracle.com/en/java/javase/21/)
+[![Spring Boot](https://img.shields.io/badge/SpringBoot-4.x-green.svg)](https://docs.spring.io/spring-boot/docs/current/reference/html/)
 [![Author](https://img.shields.io/badge/Author-HsinDumas-orange.svg?style=flat-square)](https://github.com/HsinDumas)
 
 A Spring Boot starter for xxl-job (Lite edition, EmbedServer removed).
@@ -15,16 +15,16 @@ This starter is intentionally simple:
 2. Do not start an extra EmbedServer.
 3. Reuse your existing Spring Boot container to expose `/xxl/*` endpoints.
 
-The code is based on [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/master/xxl-job-core), and the starter version stays aligned with upstream xxl-job.
+The code is based on [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/master/xxl-job-core). Starting from `4.0.0` the starter is versioned independently (JDK 21 baseline; upstream still targets 17) and no longer tracks the upstream xxl-job version. See the table below for the matching upstream version.
 
 ## Compatibility
 
 | Item | latest | last verified |
 | --- | --- | --- |
-| starter | see Releases | 3.4.2 |
-| xxl-job | follows starter version | 3.4.2 |
-| Spring Boot | 3.x | 3.4.x |
-| JDK (runtime) | 17+ | 17 |
+| starter | see Releases | 4.0.0 |
+| xxl-job | see below | 3.4.2 |
+| Spring Boot | 4.x | 4.1.1 |
+| JDK (runtime) | 21+ | 21 |
 
 For the latest version, see GitHub Releases: <https://github.com/HsinDumas/xxl-job-lite-spring-boot-starter/releases>
 
