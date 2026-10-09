@@ -22,7 +22,7 @@
 
 | 项 | latest | last verified |
 | --- | --- | --- |
-| starter | 见顶部徽章 | 4.0.0 |
+| starter | 见顶部徽章 | 4.0.1 |
 | xxl-job | 见下 | 3.4.2 |
 | Spring Boot | 4.x | 4.1.1 |
 | JDK (runtime) | 21+ | 21 |
@@ -37,7 +37,7 @@
 <dependency>
     <groupId>com.github.hsindumas</groupId>
     <artifactId>xxl-job-lite-spring-boot-starter</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
 </dependency>
 ```
 
@@ -118,7 +118,7 @@ git push origin vX.Y.Z
 
 CI 会执行：版本校验、Central 发布、GitHub Release 生成。
 
-准备 4.0.1 发布时，先执行 `./gradlew --no-daemon -PreleaseVersion=4.0.1 build`，确认构建通过。提交并推送修复后，再为修复提交创建和推送 `v4.0.1` 标签。
+推送版本标签前，先执行 `./gradlew --no-daemon -PreleaseVersion=X.Y.Z build`，确认构建通过，并确保标签指向已提交的发布代码。已发布标签不要重复创建或覆盖。
 
 ## 许可证
 

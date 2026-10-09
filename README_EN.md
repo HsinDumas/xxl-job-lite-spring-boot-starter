@@ -22,7 +22,7 @@ The code is based on [XXL-JOB-CORE](https://github.com/xuxueli/xxl-job/tree/mast
 
 | Item | latest | last verified |
 | --- | --- | --- |
-| starter | see badge above | 4.0.0 |
+| starter | see badge above | 4.0.1 |
 | xxl-job | see below | 3.4.2 |
 | Spring Boot | 4.x | 4.1.1 |
 | JDK (runtime) | 21+ | 21 |
@@ -37,7 +37,7 @@ Per-version change notes and upgrade guides are in GitHub Releases: <https://git
 <dependency>
     <groupId>com.github.hsindumas</groupId>
     <artifactId>xxl-job-lite-spring-boot-starter</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
 </dependency>
 ```
 
@@ -118,7 +118,7 @@ git push origin vX.Y.Z
 
 CI will run version checks, publish to Central, and create GitHub Release notes.
 
-To prepare 4.0.1, run `./gradlew --no-daemon -PreleaseVersion=4.0.1 build` and confirm the build passes. Commit and push the fix before creating and pushing the `v4.0.1` tag on that commit.
+Before pushing a version tag, run `./gradlew --no-daemon -PreleaseVersion=X.Y.Z build` and confirm the build passes. Ensure the tag points to committed release code. Do not recreate or overwrite published tags.
 
 ## License
 
