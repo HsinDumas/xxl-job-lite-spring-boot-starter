@@ -16,6 +16,8 @@ public class XxlJobProperties {
 
     private String accessToken;
 
+    private boolean glueEnabled = true;
+
     private String appname;
 
     private String address;
@@ -40,6 +42,14 @@ public class XxlJobProperties {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public boolean isGlueEnabled() {
+        return glueEnabled;
+    }
+
+    public void setGlueEnabled(boolean glueEnabled) {
+        this.glueEnabled = glueEnabled;
     }
 
     public String getAppname() {

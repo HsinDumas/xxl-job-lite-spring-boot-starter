@@ -46,6 +46,7 @@ public class XxlJobExecutor  {
 
     private String adminAddresses;
     private String accessToken;
+    private boolean glueEnabled = true;
     private int timeout;
     private Boolean enabled;
     private String appname;
@@ -60,6 +61,9 @@ public class XxlJobExecutor  {
     }
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+    public void setGlueEnabled(boolean glueEnabled) {
+        this.glueEnabled = glueEnabled;
     }
     public void setTimeout(int timeout) {
         this.timeout = timeout;
@@ -88,6 +92,9 @@ public class XxlJobExecutor  {
 
     public String getAccessToken() {
         return accessToken;
+    }
+    public boolean isGlueEnabled() {
+        return glueEnabled;
     }
     public String getAppname() {
         return appname;

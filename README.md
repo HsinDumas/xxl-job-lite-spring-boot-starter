@@ -53,6 +53,8 @@ xxljob:
   # address: http://127.0.0.1:8081/xxl
   # 可选
   # access-token: your-token
+  # 可选，默认 true；无入口鉴权时建议关闭动态 GLUE
+  glue-enabled: false
   # 可选，默认 3
   # log-retention-days: 3
   # 可选
@@ -87,8 +89,17 @@ public class DemoJob {
 | `xxljob.appname` | 建议 | 执行器名称；有值时开启自动注册 |
 | `xxljob.address` | 否 | 执行器注册地址；不填则自动推导 |
 | `xxljob.access-token` | 否 | 调度鉴权 token |
+| `xxljob.glue-enabled` | 否 | 默认 true，兼容官方动态 GLUE；false 时仅允许 BEAN |
 | `xxljob.log-retention-days` | 否 | 日志保留天数，默认 3 |
 | `xxljob.log-path` | 否 | 执行器日志目录 |
+
+## 4.0.1 安全升级说明
+
+- 新增 `xxljob.glue-enabled`，默认 `true`，保持官方 Groovy 和脚本 GLUE 行为。默认配置不会阻断动态代码执行风险。
+- 配置 `xxljob.glue-enabled=false` 后，仅允许 `BEAN` 任务。Groovy 和所有脚本 GLUE 类型均在执行分发层、创建 handler 或操作任务线程之前拒绝，返回任务失败响应。关闭前需将已有 GLUE 任务迁移为 `@XxlJob` BEAN 任务。
+- token 配置和 HTTP 入口鉴权行为不变，兼容无法提供 access-token 的旧控制台。Lite 的 MVC 入口仍不校验 token，单独配置 token 不能保护此入口；开启 GLUE 时必须通过宿主鉴权或网络隔离限制为可信调度中心访问。关闭 GLUE 也不阻止未授权触发 BEAN、停止任务和读取日志。
+- 执行器接口不应暴露公网。使用 TLS，并通过网关或网络 ACL 限制为仅调度中心可访问；不要依赖 WAF 脚本关键词匹配。
+- 4.0.1 提供可选的动态 GLUE 限制，不改变上游兼容默认值，也不代表已修复 HTTP 入口鉴权问题。
 
 ## 构建
 
@@ -106,6 +117,8 @@ git push origin vX.Y.Z
 ```
 
 CI 会执行：版本校验、Central 发布、GitHub Release 生成。
+
+准备 4.0.1 发布时，先执行 `./gradlew --no-daemon -PreleaseVersion=4.0.1 build`，确认构建通过。提交并推送修复后，再为修复提交创建和推送 `v4.0.1` 标签。
 
 ## 许可证
 

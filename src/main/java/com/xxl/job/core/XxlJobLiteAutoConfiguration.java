@@ -37,6 +37,7 @@ public class XxlJobLiteAutoConfiguration {
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
         xxlJobSpringExecutor.setAdminAddresses(xxlJobProperties.getAdminAddresses());
         xxlJobSpringExecutor.setAccessToken(xxlJobProperties.getAccessToken());
+        xxlJobSpringExecutor.setGlueEnabled(xxlJobProperties.isGlueEnabled());
         xxlJobSpringExecutor.setLogPath(xxlJobProperties.getLogPath());
         xxlJobSpringExecutor.setLogRetentionDays(xxlJobProperties.getLogRetentionDays());
 

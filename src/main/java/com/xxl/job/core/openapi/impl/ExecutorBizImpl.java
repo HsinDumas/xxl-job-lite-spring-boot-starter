@@ -47,13 +47,27 @@ public class ExecutorBizImpl implements ExecutorBiz {
 
     @Override
     public Response<String> run(TriggerRequest triggerRequest) {
+        if (triggerRequest == null) {
+            logger.warn("Rejected executor run request: request is null");
+            return Response.of(XxlJobContext.HANDLE_CODE_FAIL, "Trigger request must not be null.");
+        }
+        GlueTypeEnum glueTypeEnum = GlueTypeEnum.match(triggerRequest.getGlueType());
+        if (glueTypeEnum == null) {
+            logger.warn("Rejected executor run request: invalid glue type");
+            return Response.of(XxlJobContext.HANDLE_CODE_FAIL, "glueType[" + triggerRequest.getGlueType() + "] is not valid.");
+        }
+        // ponytail: check the switch before creating handlers or changing job threads.
+        if (glueTypeEnum != GlueTypeEnum.BEAN && !XxlJobExecutor.getInstance().isGlueEnabled()) {
+            logger.warn("Rejected executor run request: dynamic GLUE is disabled");
+            return Response.of(XxlJobContext.HANDLE_CODE_FAIL, "Dynamic GLUE is disabled; only BEAN jobs are supported.");
+        }
+
         // load old：jobHandler + jobThread
         JobThread jobThread = XxlJobExecutor.getInstance().loadJobThread(triggerRequest.getJobId());
         IJobHandler jobHandler = jobThread!=null?jobThread.getHandler():null;
         String removeOldReason = null;
 
         // valid：jobHandler + jobThread
-        GlueTypeEnum glueTypeEnum = GlueTypeEnum.match(triggerRequest.getGlueType());
         if (GlueTypeEnum.BEAN == glueTypeEnum) {
 
             // new jobhandler
@@ -99,7 +113,7 @@ public class ExecutorBizImpl implements ExecutorBiz {
                     return Response.of(XxlJobContext.HANDLE_CODE_FAIL, e.getMessage());
                 }
             }
-        } else if (glueTypeEnum!=null && glueTypeEnum.isScript()) {
+        } else if (glueTypeEnum.isScript()) {
 
             // valid old jobThread
             if (jobThread != null &&
@@ -114,10 +128,8 @@ public class ExecutorBizImpl implements ExecutorBiz {
 
             // valid handler
             if (jobHandler == null) {
-                jobHandler = new ScriptJobHandler(triggerRequest.getJobId(), triggerRequest.getGlueUpdatetime(), triggerRequest.getGlueSource(), GlueTypeEnum.match(triggerRequest.getGlueType()));
+                jobHandler = new ScriptJobHandler(triggerRequest.getJobId(), triggerRequest.getGlueUpdatetime(), triggerRequest.getGlueSource(), glueTypeEnum);
             }
-        } else {
-            return Response.of(XxlJobContext.HANDLE_CODE_FAIL, "glueType[" + triggerRequest.getGlueType() + "] is not valid.");
         }
 
         // executor block strategy

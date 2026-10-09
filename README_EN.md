@@ -53,6 +53,8 @@ xxljob:
   # address: http://127.0.0.1:8081/xxl
   # Optional
   # access-token: your-token
+  # Optional, defaults to true; disable dynamic GLUE when endpoint authentication is absent
+  glue-enabled: false
   # Optional, default is 3
   # log-retention-days: 3
   # Optional
@@ -87,8 +89,17 @@ public class DemoJob {
 | `xxljob.appname` | Recommended | Executor app name; enables auto-registration when present |
 | `xxljob.address` | No | Executor registry address; auto-derived when absent |
 | `xxljob.access-token` | No | Scheduling auth token |
+| `xxljob.glue-enabled` | No | Defaults to true for upstream GLUE compatibility; false allows only BEAN |
 | `xxljob.log-retention-days` | No | Log retention days, default is 3 |
 | `xxljob.log-path` | No | Executor log directory |
+
+## 4.0.1 Security Upgrade
+
+- Adds `xxljob.glue-enabled`, defaulting to `true` to preserve upstream Groovy and script GLUE behavior. The default does not block the dynamic code execution risk.
+- With `xxljob.glue-enabled=false`, only `BEAN` jobs are supported. Groovy and all script GLUE types are rejected in the shared dispatcher before handler creation or job thread changes, with a job failure response. Migrate existing GLUE jobs to `@XxlJob` BEAN jobs before disabling GLUE.
+- Token configuration and HTTP authentication behavior remain unchanged for older admins without access-token support. The Lite MVC endpoints still do not validate tokens; configuring a token alone does not protect them. When GLUE is enabled, host authentication or network isolation must restrict access to a trusted admin. Disabling GLUE does not prevent unauthorized BEAN triggering, job termination, or log access.
+- Do not expose executor endpoints to the public internet. Use TLS and gateway/network ACLs to restrict access to the admin; do not rely on WAF script keyword matching.
+- 4.0.1 provides an optional GLUE restriction without changing upstream-compatible defaults; it does not fix HTTP endpoint authentication.
 
 ## Build
 
@@ -106,6 +117,8 @@ git push origin vX.Y.Z
 ```
 
 CI will run version checks, publish to Central, and create GitHub Release notes.
+
+To prepare 4.0.1, run `./gradlew --no-daemon -PreleaseVersion=4.0.1 build` and confirm the build passes. Commit and push the fix before creating and pushing the `v4.0.1` tag on that commit.
 
 ## License
 
